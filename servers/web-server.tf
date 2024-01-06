@@ -42,6 +42,16 @@ resource "aws_autoscaling_group" "web-server" {
     strategy = "Rolling"
   }
 
+  dynamic "tag" {
+    for_each = var.custom_tags
+
+    content {
+      key = each.key
+      value = each.value
+      propagate_at_launch = true
+    }
+  }
+
   tag {
     key = "Name"
     value = "${var.cluster_name}-terraform-web-server-asg"

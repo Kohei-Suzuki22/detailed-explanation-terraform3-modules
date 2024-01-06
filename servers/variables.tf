@@ -43,3 +43,13 @@ variable "autoscaling_max_size" {
   type = number
   default = 2
 }
+
+variable "custom_tags" {
+  type = map(string)
+
+  default = {
+    "Owner" = "team-foo"
+    "DeployedBy" = "terraform"
+  }
+  
+}
