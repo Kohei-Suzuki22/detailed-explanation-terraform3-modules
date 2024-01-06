@@ -120,3 +120,27 @@ resource "aws_lb_target_group" "alb" {
   }
   
 }
+
+
+
+resource "aws_autoscaling_schedule" "scale_out_during_business_hours" {
+  count = var.autoscaling_enable_flg ? 1 : 0
+  scheduled_action_name = "scale-out-during-business-hours"
+  autoscaling_group_name = aws_autoscaling_group.web-server.name 
+  min_size = 2
+  max_size = 4
+  desired_capacity = 4
+  time_zone = "Asia/Tokyo"
+  recurrence = "0 9 * * *"
+}
+
+resource "aws_autoscaling_schedule" "scale_in_at_night" {
+  count = var.autoscaling_enable_flg ? 1 : 0
+  scheduled_action_name = "scal-in-at-night"
+  autoscaling_group_name = aws_autoscaling_group.web-server.name 
+  min_size = 2
+  max_size = 4
+  desired_capacity = 2
+  time_zone = "Asia/Tokyo"
+  recurrence = "0 17 * * *"
+}

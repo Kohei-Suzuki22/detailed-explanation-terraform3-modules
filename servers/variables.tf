@@ -44,6 +44,11 @@ variable "autoscaling_max_size" {
   default = 2
 }
 
+variable "autoscaling_enable_flg" {
+  type = bool
+  default = false
+}
+
 variable "custom_tags" {
   type = map(string)
 
