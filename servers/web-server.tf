@@ -46,8 +46,9 @@ resource "aws_autoscaling_group" "web-server" {
     for_each = var.custom_tags
 
     content {
-      key = each.key
-      value = each.value
+      # dynamicの場合はeach.keyではなく、dynamic "tag" の keyを使って、tag.keyのように取得する
+      key = tag.key
+      value = tag.value
       propagate_at_launch = true
     }
   }
