@@ -19,6 +19,20 @@ variable "databases_remote_state_key" {
   type = string
 }
 
+variable "ami" {
+  type = string
+  default = "ami-07c589821f2b353aa"
+}
+
+variable "server_text" {
+  type = string
+  default = "Hello, World"
+}
+
+variable "elb_min_size" {
+  type = number
+  default = 2
+}
 
 variable "server_port" {
   description = "The port the server will use for HTTP requests"

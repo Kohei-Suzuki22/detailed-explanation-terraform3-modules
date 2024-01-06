@@ -1,5 +1,5 @@
 # resource "aws_instance" "web-server" {
-#   ami = "ami-07c589821f2b353aa"
+#   ami = var.ami
 #   instance_type = "t2.micro"
 #   subnet_id = data.terraform_remote_state.globals.outputs.subnet_ids[0]
 
@@ -9,7 +9,7 @@
 
 
 resource "aws_launch_configuration" "web-server" {
-  image_id = "ami-07c589821f2b353aa"
+  image_id = var.ami
   instance_type = var.instance_type
 
 
@@ -17,6 +17,7 @@ resource "aws_launch_configuration" "web-server" {
 
   # templatefileで、module内のpathを参照する際は、${path.module}を使わないといけない。
   user_data = templatefile("${path.module}/scripts/user-data.sh", {
+    server_text = var.server_text
     server_port = var.server_port
     db_address = data.terraform_remote_state.databases.outputs.address
     db_port = data.terraform_remote_state.databases.outputs.port
@@ -29,6 +30,8 @@ resource "aws_launch_configuration" "web-server" {
 }
 
 resource "aws_autoscaling_group" "web-server" {
+  # 起動設定の鈴木皓平に依存させることで、起動設定が置き換えられたらASGも置き換えられるような仕組みにする。
+  name = "${var.cluster_name}-${aws_launch_configuration.web-server.name}"
   launch_configuration = aws_launch_configuration.web-server.name
   vpc_zone_identifier = data.terraform_remote_state.globals.outputs.subnet_ids
 
@@ -37,6 +40,15 @@ resource "aws_autoscaling_group" "web-server" {
 
   min_size = var.autoscaling_min_size
   max_size = var.autoscaling_max_size
+
+  # ASGデプロイが完了したとみなされる前に、最低でもこの数のインスタンスがヘルスチェックをパスするまで待つ。
+  # 更にcreate_before_destroyを設定しておくことで、この数の新規インスタンスが指定した個数分作成されないと、古いリソースは削除されない。
+  min_elb_capacity = var.elb_min_size
+
+  # 新規のリソースを先に作成してから、元のリソースを削除する
+  lifecycle {
+    create_before_destroy = true
+  }
 
   instance_refresh {
     strategy = "Rolling"
