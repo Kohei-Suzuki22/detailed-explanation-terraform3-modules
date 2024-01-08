@@ -8,8 +8,8 @@ resource "aws_db_instance" "mysql" {
   db_name = "mydb"
   db_subnet_group_name = aws_db_subnet_group.mysql.name
 
-  username = var.db_username
-  password = var.db_password
+  username = local.db_creds.db_username
+  password = local.db_creds.db_password
 }
 
 resource "aws_db_subnet_group" "mysql" {
@@ -22,3 +22,9 @@ resource "aws_db_subnet_group" "mysql" {
 }
 
 
+data "aws_secretsmanager_secret_version" "db_creds" {
+  secret_id = "detailed-explanation-terraform/db/cred"
+}
+locals {
+  db_creds = jsondecode(data.aws_secretsmanager_secret_version.db_creds.secret_string)
+}
