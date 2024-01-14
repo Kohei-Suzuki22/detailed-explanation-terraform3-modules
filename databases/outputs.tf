@@ -7,3 +7,7 @@ output "port" {
   description = "The port the database is listhening on"
   value = aws_db_instance.mysql.port
 }
+
+output "db_instance_arn" {
+  value = aws_db_instance.mysql.arn
+}
